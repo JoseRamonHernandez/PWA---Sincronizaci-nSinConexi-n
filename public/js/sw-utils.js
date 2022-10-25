@@ -32,8 +32,11 @@ function manejoApiMensajes(dynamicCache, req){
 
     if(req.clone().method === 'POST')
     {
-        return fetch(req);
+        req.clone().text().then(body=> {
+            console.log(body);
+        });
 
+        return fetch(req);
     }
     else
     {
