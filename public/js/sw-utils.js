@@ -1,4 +1,3 @@
-// Guardar  en el cache dinamico
 function actualizaCacheDinamico( dynamicCache, req, res ) {
     if ( res.ok ) {
         return caches.open( dynamicCache ).then( cache => {
@@ -28,36 +27,45 @@ function actualizaCacheStatico( staticCache, req, APP_SHELL_INMUTABLE )
     }
 }
 
-function manejoApiMensajes(dynamicCache, req){
+function manejoApiMensajes(dynamicCache, req)
+{
 
     if(req.clone().method === 'POST')
     {
-        req.clone().text().then(body=> {
-            console.log(body);
-        });
 
-        return fetch(req);
-    }
-    else
-    {
-    return fetch(req).then(res=>
-        {
+        if ( self.registration.sync ) {
+            return req.clone().text().then( body =>{
 
-        if(res.ok)
-        {
-            actualizaCacheDinamico(cacheName, req, res.clone());
-            return res.clone();
+                // console.log(body);
+                const bodyObj = JSON.parse( body );
+                return guardarMensaje( bodyObj );
+
+            });
+        } else {
+            return fetch( req );
         }
+
+    }
 
         else
         {
-            return caches.match(req);
+            return fetch( req ).then( res => {
+
+                if ( res.ok ) {
+                    actualizaCacheDinamico( cacheName, req, res.clone() );
+                    return res.clone();
+                } else {
+                    return caches.match( req );
+                }
+    
+            }).catch( err => {
+                return caches.match( req );
+            });
         }
 
-    }).catch(err => 
-        {
-        return caches.match(req);
-    });
+    }
 
-}
-}
+        
+        
+
+
